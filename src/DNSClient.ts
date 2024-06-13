@@ -1,9 +1,10 @@
+import { DNSInterface } from "./DNSClientInterface";
 import { DNSPacket } from "./PacketInfo";
 import { sockets, queriesArray, pendingQueries } from "./StartingPoint";
 
-type UserInterfaceData = { name: string, type: string };
+export type UserInterfaceData = { name: string, type: string };
 
-export class DnsClient {
+export class DnsClient implements DNSInterface {
     async start() {
         // await this.processData(data);
     }

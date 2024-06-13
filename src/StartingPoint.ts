@@ -1,5 +1,6 @@
 import { Communicator } from "./CommunicationLayer";
 import { DnsClient } from "./DNSClient";
+import { DNSInterface } from "./DNSClientInterface";
 import startFileInterface from "./FileInput";
 import { DNSPacket } from "./PacketInfo";
 import { ResponseHandler } from './ResponseLayer';
@@ -8,7 +9,7 @@ import startUserInterface from "./UserInterface";
 export const queriesArray: Array<{ index: number, headerID: number, domainName: string, type: string, packet: DNSPacket | null }> = [];
 export const pendingQueries = new Map<number, { promise: Promise<void>, resolve: () => void }>();
 export const sockets = new Communicator(ResponseHandler.handleResponse);
-export const Client = new DnsClient();
+export const Client: DNSInterface = new DnsClient();
 
 const mainFunction = async () => {
     try {
