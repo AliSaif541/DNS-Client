@@ -37,44 +37,28 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Communicator = void 0;
-var dgram = require("dgram");
-var net = require("net");
-var DNS_SERVER = '1.1.1.1';
-var DNS_PORT = 53;
+var UDPCommunicator_1 = require("./UDPCommunicator");
+var TCPCommunicator_1 = require("./TCPCommunicator");
 var Communicator = /** @class */ (function () {
-    function Communicator(responseHandler) {
+    function Communicator(responseHandler, udpCommunicator, tcpCommunicator) {
         var _this = this;
-        this.udpSocket = dgram.createSocket('udp4');
-        this.tcpClient = new net.Socket();
         this.responseHandler = responseHandler;
-        this.tcpClient.connect(DNS_PORT, DNS_SERVER);
-        this.udpSocket.on('message', function (msg) { return _this.responseHandler(msg); });
-        this.udpSocket.on('error', function (err) { return console.error('UDP Socket error:', err); });
-        this.tcpClient.on('data', function (data) { return _this.responseHandler(data.subarray(2)); });
-        this.tcpClient.on('error', function (err) { return console.error('TCP Client error:', err); });
+        this.udpCommunicator = udpCommunicator || new UDPCommunicator_1.UdpCommunicator();
+        this.tcpCommunicator = tcpCommunicator || new TCPCommunicator_1.TcpCommunicator();
+        this.udpCommunicator.onReceive(function (msg) { return _this.responseHandler(msg); });
+        this.udpCommunicator.onError(function (err) { return console.error('UDP Communicator error:', err); });
+        this.tcpCommunicator.onReceive(function (data) { return _this.responseHandler(data.subarray(2)); });
+        this.tcpCommunicator.onError(function (err) { return console.error('TCP Communicator error:', err); });
     }
-    Communicator.prototype.sendDnsQueryUdp = function (queryBuffer) {
-        this.udpSocket.send(queryBuffer, 0, queryBuffer.length, DNS_PORT, DNS_SERVER, function (err) {
-            if (err) {
-                console.error('Error sending UDP query:', err);
-            }
-        });
-    };
-    Communicator.prototype.sendDnsQueryTcp = function (queryBuffer) {
-        var lengthBuffer = Buffer.alloc(2);
-        lengthBuffer.writeUInt16BE(queryBuffer.length, 0);
-        var tcpBuffer = Buffer.concat([lengthBuffer, queryBuffer]);
-        this.tcpClient.write(tcpBuffer);
-    };
     Communicator.prototype.performDnsQuery = function (queryBuffer) {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
                 try {
                     if (queryBuffer.length <= 512) {
-                        this.sendDnsQueryUdp(queryBuffer);
+                        this.udpCommunicator.send(queryBuffer);
                     }
                     else {
-                        this.sendDnsQueryTcp(queryBuffer);
+                        this.tcpCommunicator.send(queryBuffer);
                     }
                 }
                 catch (error) {
@@ -86,13 +70,8 @@ var Communicator = /** @class */ (function () {
         });
     };
     Communicator.prototype.closeSockets = function () {
-        if (this.udpSocket) {
-            this.udpSocket.close();
-        }
-        if (this.tcpClient) {
-            this.tcpClient.end();
-            this.tcpClient.destroy();
-        }
+        this.udpCommunicator.close();
+        this.tcpCommunicator.close();
     };
     return Communicator;
 }());
