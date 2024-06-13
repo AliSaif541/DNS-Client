@@ -1,4 +1,3 @@
-// OutputLayer.ts
 import { IOutput } from './OutputInterface';
 import { DNSPacket } from "./PacketInfo";
 import { pendingQueries, queriesArray } from "./StartingPoint";
