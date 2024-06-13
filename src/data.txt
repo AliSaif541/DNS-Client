@@ -1,6 +1,6 @@
-google.com, A
+www.google.com, A
 lms.lums.edu.pk, A
 google.com, AAAA
 www.abc.com, CNAME
-facebook.com, A
-facebook.com, AAAA
+www.facebkom, A
+www.facebook.com, CNAME

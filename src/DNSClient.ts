@@ -28,17 +28,22 @@ export class DnsClient {
             for (const { name, type } of data) {
                 if (!name || !type) {
                     console.error("Invalid data received:", { name, type });
-                    continue;
+                    return;
                 }
 
                 if (type !== "AAAA" && type !== "A" && type !== "CNAME") {
-                    console.error("Invalid record type. Please enter 'A', 'AAAA', or 'CNAME'.");
+                    console.error(`${name}, ${type}: Invalid record type. Please enter 'A', 'AAAA', or 'CNAME'.`);
                     return;
+                }
+
+                let realName = name;
+                if (type === "A" || type === "AAAA") {
+                    realName = name.replace(/^www\./, ''); 
                 }
 
                 const randomNumber = Math.floor(Math.random() * 65536); 
                 const index = queriesArray.length;
-                queriesArray.push({ index, headerID: randomNumber, domainName: name, type, packet: null });
+                queriesArray.push({ index, headerID: randomNumber, domainName: realName, type, packet: null });
 
                 let resolvePromise: () => void;
                 const promise = new Promise<void>((resolve) => {
@@ -47,7 +52,7 @@ export class DnsClient {
 
                 pendingQueries.set(randomNumber, { promise, resolve: resolvePromise! });
 
-                this.queryFlow(index, randomNumber, name, type);
+                this.queryFlow(index, randomNumber, realName, type);
             }
         } catch (error) {
             console.error("Error processing data:", error);

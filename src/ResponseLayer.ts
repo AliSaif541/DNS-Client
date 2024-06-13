@@ -16,7 +16,13 @@ export class ResponseHandler {
 
                 const output = new Output(ID);
                 console.log(`Index ${queryIndex}: ${updatedPacket.Questions[0].Name}, ${updatedPacket.Questions[0].Type}: `);
-                console.log(output.findingIPAddress());
+                const result = output.findingIPAddress();
+                if (result.length !== 0) {
+                    console.log(result);
+                } 
+                else {
+                    console.log("No IP Adresses found");
+                }
 
                 const pendingQuery = pendingQueries.get(ID);
                 if (pendingQuery) {
