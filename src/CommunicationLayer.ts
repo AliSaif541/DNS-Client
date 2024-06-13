@@ -14,11 +14,15 @@ export class Communicator {
         this.udpCommunicator = udpCommunicator || new UdpCommunicator();
         this.tcpCommunicator = tcpCommunicator || new TcpCommunicator();
 
-        this.udpCommunicator.onReceive((msg) => this.responseHandler(msg));
-        this.udpCommunicator.onError((err) => console.error('UDP Communicator error:', err));
+        this.udpCommunicator.onResponse(
+            (msg) => this.responseHandler(msg),
+            (err) => console.error('UDP Communicator error:', err)
+        );
 
-        this.tcpCommunicator.onReceive((data) => this.responseHandler(data.subarray(2)));
-        this.tcpCommunicator.onError((err) => console.error('TCP Communicator error:', err));
+        this.tcpCommunicator.onResponse(
+            (data) => this.responseHandler(data.subarray(2)),
+            (err) => console.error('TCP Communicator error:', err)
+        );
     }
 
     async performDnsQuery(queryBuffer: Buffer): Promise<void> {

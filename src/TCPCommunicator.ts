@@ -19,12 +19,9 @@ export class TcpCommunicator implements ICommunicator {
         this.tcpClient.write(tcpBuffer);
     }
 
-    onReceive(handler: (msg: Buffer) => void): void {
-        this.tcpClient.on('data', (data) => handler(data.subarray(2)));
-    }
-
-    onError(handler: (err: Error) => void): void {
-        this.tcpClient.on('error', handler);
+    onResponse(onReceiveHandler: (msg: Buffer) => void, onErrorHandler: (err: Error) => void): void {
+        this.tcpClient.on('data', (data) => onReceiveHandler(data.subarray(2)));
+        this.tcpClient.on('error', onErrorHandler);
     }
 
     close(): void {

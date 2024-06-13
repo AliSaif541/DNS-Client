@@ -18,12 +18,9 @@ export class UdpCommunicator implements ICommunicator {
         });
     }
 
-    onReceive(handler: (msg: Buffer) => void): void {
-        this.udpSocket.on('message', handler);
-    }
-
-    onError(handler: (err: Error) => void): void {
-        this.udpSocket.on('error', handler);
+    onResponse(onReceiveHandler: (msg: Buffer) => void, onErrorHandler: (err: Error) => void): void {
+        this.udpSocket.on('message', onReceiveHandler);
+        this.udpSocket.on('error', onErrorHandler);
     }
 
     close(): void {
