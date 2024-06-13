@@ -10,11 +10,13 @@ export const pendingQueries = new Map<number, { promise: Promise<void>, resolve:
 export const sockets = new Communicator(ResponseHandler.handleResponse);
 export const Client = new DnsClient();
 
-(async () => {
-    try {
+const mainFunction = async () => {
+   try {
         await startFileInterface();
         await Promise.all(Array.from(pendingQueries.values()).map(entry => entry.promise));
     } finally {
         sockets.closeSockets();
     }
-})();
+};
+
+mainFunction();
