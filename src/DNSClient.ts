@@ -6,7 +6,7 @@ export type UserInterfaceData = { name: string, type: string };
 
 export class DnsClient implements DNSInterface {
     async start() {
-        // await this.processData(data);
+        // User can initialize their own objects in start through interface
     }
 
     async queryFlow(data: UserInterfaceData[]) {
