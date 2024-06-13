@@ -16,7 +16,7 @@ async function getUserInput(): Promise<void> {
             const domainName = await askQuestion("Enter the domain name: ");
             const recordType = await askQuestion("Enter the record type (A, AAAA, CNAME): ");
     
-            await Client.start([{ name: domainName, type: recordType }]);
+            await Client.queryFlow([{ name: domainName, type: recordType }]);
         }
     } catch (error) {
         console.error("Error getting user input:", error);

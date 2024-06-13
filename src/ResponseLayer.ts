@@ -16,8 +16,9 @@ export class ResponseHandler {
                 queriesArray[queryIndex] = { ...queryInfo, packet: updatedPacket };
 
                 const output: IOutput = new Output(ID);
-                const results = output.findingIPAddress();
-                output.outputAnswer(results, updatedPacket, queryIndex, ID);
+                output.handleResponse(queryIndex);
+                // const results = output.findingIPAddress();
+                // output.outputAnswer(results, updatedPacket, queryIndex, ID);
                 
             } else {
                 console.error(`Query info for ID ${ID} is undefined.`);

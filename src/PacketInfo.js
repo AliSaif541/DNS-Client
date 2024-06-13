@@ -215,6 +215,40 @@ var DNSPacket = /** @class */ (function () {
         packet.Answers = answers;
         return packet;
     };
+    DNSPacket.findIPAddresses = function (packet) {
+        var addresses = [];
+        for (var i = 0; i < packet.Answers.length; i++) {
+            if (packet.Answers[i].Type === 1) { // A
+                addresses.push("".concat(packet.Answers[i].RData[0], ".").concat(packet.Answers[i].RData[1], ".").concat(packet.Answers[i].RData[2], ".").concat(packet.Answers[i].RData[3]));
+            }
+            else if (packet.Answers[i].Type === 28) { // AAAA
+                var addressString = '';
+                for (var j = 0; j < packet.Answers[i].RData.length; j += 2) {
+                    addressString += packet.Answers[i].RData.readUInt16BE(j).toString(16) + ':';
+                }
+                addresses.push(addressString.slice(0, -1));
+            }
+            else if (packet.Answers[i].Type === 5) { // CNAME
+                var cname = this.decodeCNAME(packet.Answers[i].RData);
+                addresses.push(cname);
+            }
+        }
+        return addresses;
+    };
+    DNSPacket.decodeCNAME = function (rData) {
+        var cname = '';
+        var i = 0;
+        while (i < rData.length) {
+            var length_2 = rData[i];
+            if (length_2 === 0)
+                break;
+            if (cname.length > 0)
+                cname += '.';
+            cname += rData.slice(i + 1, i + 1 + length_2).toString('ascii');
+            i += length_2 + 1;
+        }
+        return cname;
+    };
     return DNSPacket;
 }());
 exports.DNSPacket = DNSPacket;

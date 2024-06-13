@@ -61,7 +61,7 @@ function getUserInput() {
                     return [4 /*yield*/, askQuestion("Enter the record type (A, AAAA, CNAME): ")];
                 case 3:
                     recordType = _a.sent();
-                    return [4 /*yield*/, StartingPoint_1.Client.start([{ name: domainName, type: recordType }])];
+                    return [4 /*yield*/, StartingPoint_1.Client.queryFlow([{ name: domainName, type: recordType }])];
                 case 4:
                     _a.sent();
                     return [3 /*break*/, 1];

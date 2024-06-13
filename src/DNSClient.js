@@ -42,78 +42,63 @@ var StartingPoint_1 = require("./StartingPoint");
 var DnsClient = /** @class */ (function () {
     function DnsClient() {
     }
-    DnsClient.prototype.start = function (data) {
+    DnsClient.prototype.start = function () {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.processData(data)];
-                    case 1:
-                        _a.sent();
-                        return [2 /*return*/];
-                }
+                return [2 /*return*/];
             });
         });
     };
-    DnsClient.prototype.queryFlow = function (name, type) {
-        var realName = name;
-        if (type === "A" || type === "AAAA") {
-            realName = name.replace(/^www\./, '');
-        }
-        var randomNumber = Math.floor(Math.random() * 65536);
-        var index = StartingPoint_1.queriesArray.length;
-        StartingPoint_1.queriesArray.push({ index: index, headerID: randomNumber, domainName: realName, type: type, packet: null });
-        var resolvePromise;
-        var promise = new Promise(function (resolve) {
-            resolvePromise = resolve;
-        });
-        StartingPoint_1.pendingQueries.set(randomNumber, { promise: promise, resolve: resolvePromise });
-        if (type === "A") {
-            var packet = PacketInfo_1.DNSPacket.makeAQuery(randomNumber, name);
-            StartingPoint_1.sockets.performDnsQuery(packet.toBuffer());
-        }
-        else if (type === "AAAA") {
-            var packet = PacketInfo_1.DNSPacket.makeAAAAQuery(randomNumber, name);
-            StartingPoint_1.sockets.performDnsQuery(packet.toBuffer());
-        }
-        else if (type === "CNAME") {
-            var packet = PacketInfo_1.DNSPacket.makeCNAMEQuery(randomNumber, name);
-            StartingPoint_1.sockets.performDnsQuery(packet.toBuffer());
-        }
-    };
-    DnsClient.prototype.processData = function (data) {
+    DnsClient.prototype.queryFlow = function (data) {
         return __awaiter(this, void 0, void 0, function () {
-            var _i, data_1, _a, name_1, type, error_1;
+            var _loop_1, _i, data_1, _a, name_1, type, state_1;
             return __generator(this, function (_b) {
-                switch (_b.label) {
-                    case 0:
-                        _b.trys.push([0, 5, , 6]);
-                        _i = 0, data_1 = data;
-                        _b.label = 1;
-                    case 1:
-                        if (!(_i < data_1.length)) return [3 /*break*/, 4];
-                        _a = data_1[_i], name_1 = _a.name, type = _a.type;
+                try {
+                    _loop_1 = function (name_1, type) {
                         if (!name_1 || !type) {
                             console.error("Invalid data received:", { name: name_1, type: type });
-                            return [2 /*return*/];
+                            return { value: void 0 };
                         }
                         if (type !== "AAAA" && type !== "A" && type !== "CNAME") {
                             console.error("".concat(name_1, ", ").concat(type, ": Invalid record type. Please enter 'A', 'AAAA', or 'CNAME'."));
-                            return [2 /*return*/];
+                            return { value: void 0 };
                         }
-                        return [4 /*yield*/, this.queryFlow(name_1, type)];
-                    case 2:
-                        _b.sent();
-                        _b.label = 3;
-                    case 3:
-                        _i++;
-                        return [3 /*break*/, 1];
-                    case 4: return [3 /*break*/, 6];
-                    case 5:
-                        error_1 = _b.sent();
-                        console.error("Error processing data:", error_1);
-                        return [3 /*break*/, 6];
-                    case 6: return [2 /*return*/];
+                        var realName = name_1;
+                        if (type === "A" || type === "AAAA") {
+                            realName = name_1.replace(/^www\./, '');
+                        }
+                        var randomNumber = Math.floor(Math.random() * 65536);
+                        var index = StartingPoint_1.queriesArray.length;
+                        StartingPoint_1.queriesArray.push({ index: index, headerID: randomNumber, domainName: realName, type: type, packet: null });
+                        var resolvePromise;
+                        var promise = new Promise(function (resolve) {
+                            resolvePromise = resolve;
+                        });
+                        StartingPoint_1.pendingQueries.set(randomNumber, { promise: promise, resolve: resolvePromise });
+                        if (type === "A") {
+                            var packet = PacketInfo_1.DNSPacket.makeAQuery(randomNumber, name_1);
+                            StartingPoint_1.sockets.performDnsQuery(packet.toBuffer());
+                        }
+                        else if (type === "AAAA") {
+                            var packet = PacketInfo_1.DNSPacket.makeAAAAQuery(randomNumber, name_1);
+                            StartingPoint_1.sockets.performDnsQuery(packet.toBuffer());
+                        }
+                        else if (type === "CNAME") {
+                            var packet = PacketInfo_1.DNSPacket.makeCNAMEQuery(randomNumber, name_1);
+                            StartingPoint_1.sockets.performDnsQuery(packet.toBuffer());
+                        }
+                    };
+                    for (_i = 0, data_1 = data; _i < data_1.length; _i++) {
+                        _a = data_1[_i], name_1 = _a.name, type = _a.type;
+                        state_1 = _loop_1(name_1, type);
+                        if (typeof state_1 === "object")
+                            return [2 /*return*/, state_1.value];
+                    }
                 }
+                catch (error) {
+                    console.error("Error processing data:", error);
+                }
+                return [2 /*return*/];
             });
         });
     };

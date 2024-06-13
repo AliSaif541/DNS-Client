@@ -71,7 +71,7 @@ function readDNSRecords(filePath) {
                     _a = false;
                     line = _e;
                     _b = line.split(',').map(function (part) { return part.trim(); }), domainName = _b[0], recordType = _b[1];
-                    return [4 /*yield*/, StartingPoint_1.Client.start([{ name: domainName, type: recordType }])];
+                    return [4 /*yield*/, StartingPoint_1.Client.queryFlow([{ name: domainName, type: recordType }])];
                 case 4:
                     _f.sent();
                     _f.label = 5;

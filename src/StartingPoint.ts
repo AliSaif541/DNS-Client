@@ -11,7 +11,8 @@ export const sockets = new Communicator(ResponseHandler.handleResponse);
 export const Client = new DnsClient();
 
 const mainFunction = async () => {
-   try {
+    try {
+        await Client.start();
         await startFileInterface();
         await Promise.all(Array.from(pendingQueries.values()).map(entry => entry.promise));
     } finally {

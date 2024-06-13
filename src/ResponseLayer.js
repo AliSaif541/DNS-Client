@@ -12,7 +12,6 @@ var __assign = (this && this.__assign) || function () {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ResponseHandler = void 0;
-// ResponseLayer.ts
 var StartingPoint_1 = require("./StartingPoint");
 var PacketInfo_1 = require("./PacketInfo");
 var OutputLayer_1 = require("./OutputLayer");
@@ -28,8 +27,9 @@ var ResponseHandler = /** @class */ (function () {
             if (queryInfo) {
                 StartingPoint_1.queriesArray[queryIndex] = __assign(__assign({}, queryInfo), { packet: updatedPacket });
                 var output = new OutputLayer_1.Output(ID);
-                var results = output.findingIPAddress();
-                output.outputAnswer(results, updatedPacket, queryIndex, ID);
+                output.handleResponse(queryIndex);
+                // const results = output.findingIPAddress();
+                // output.outputAnswer(results, updatedPacket, queryIndex, ID);
             }
             else {
                 console.error("Query info for ID ".concat(ID, " is undefined."));

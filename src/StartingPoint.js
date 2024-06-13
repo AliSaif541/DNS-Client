@@ -39,8 +39,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Client = exports.sockets = exports.pendingQueries = exports.queriesArray = void 0;
 var CommunicationLayer_1 = require("./CommunicationLayer");
 var DNSClient_1 = require("./DNSClient");
+var FileInput_1 = require("./FileInput");
 var ResponseLayer_1 = require("./ResponseLayer");
-var UserInterface_1 = require("./UserInterface");
 exports.queriesArray = [];
 exports.pendingQueries = new Map();
 exports.sockets = new CommunicationLayer_1.Communicator(ResponseLayer_1.ResponseHandler.handleResponse);
@@ -49,18 +49,21 @@ var mainFunction = function () { return __awaiter(void 0, void 0, void 0, functi
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                _a.trys.push([0, , 3, 4]);
-                return [4 /*yield*/, (0, UserInterface_1.default)()];
+                _a.trys.push([0, , 4, 5]);
+                return [4 /*yield*/, exports.Client.start()];
             case 1:
                 _a.sent();
-                return [4 /*yield*/, Promise.all(Array.from(exports.pendingQueries.values()).map(function (entry) { return entry.promise; }))];
+                return [4 /*yield*/, (0, FileInput_1.default)()];
             case 2:
                 _a.sent();
-                return [3 /*break*/, 4];
+                return [4 /*yield*/, Promise.all(Array.from(exports.pendingQueries.values()).map(function (entry) { return entry.promise; }))];
             case 3:
+                _a.sent();
+                return [3 /*break*/, 5];
+            case 4:
                 exports.sockets.closeSockets();
                 return [7 /*endfinally*/];
-            case 4: return [2 /*return*/];
+            case 5: return [2 /*return*/];
         }
     });
 }); };

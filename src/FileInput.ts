@@ -20,7 +20,7 @@ async function readDNSRecords(filePath: string): Promise<DNSRecord[]> {
   for await (const line of rl) {
     const [domainName, recordType] = line.split(',').map(part => part.trim());
   
-    await Client.start([{ name: domainName, type: recordType }]);
+    await Client.queryFlow([{ name: domainName, type: recordType }]);
   }
 
   return records;
