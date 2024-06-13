@@ -1,7 +1,10 @@
-import { queriesArray } from "./StartingPoint";
+// OutputLayer.ts
+import { IOutput } from './OutputInterface';
+import { DNSPacket } from "./PacketInfo";
+import { pendingQueries, queriesArray } from "./StartingPoint";
 
-export class Output {
-    ID: number
+export class Output implements IOutput {
+    ID: number;
 
     constructor(ID: number) {
         this.ID = ID;
@@ -31,6 +34,22 @@ export class Output {
             }
         }
         return addresses;
+    }
+
+    outputAnswer(results: string[], updatedPacket: DNSPacket, queryIndex: number, ID: number): void {
+        console.log(`Index ${queryIndex}: ${updatedPacket.Questions[0].Name}, ${updatedPacket.Questions[0].Type}: `);
+        if (results.length !== 0) {
+            console.log(results);
+        } 
+        else {
+            console.log("No IP Adresses found");
+        }
+
+        const pendingQuery = pendingQueries.get(ID);
+        if (pendingQuery) {
+            pendingQuery.resolve();
+            pendingQueries.delete(ID);
+        }
     }
     
     private decodeCNAME(rData: Buffer): string {

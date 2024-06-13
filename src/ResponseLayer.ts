@@ -1,5 +1,7 @@
+// ResponseLayer.ts
 import { queriesArray, pendingQueries } from './StartingPoint';
 import { DNSPacket } from './PacketInfo';
+import { IOutput } from './OutputInterface';
 import { Output } from './OutputLayer';
 
 export class ResponseHandler {
@@ -14,21 +16,10 @@ export class ResponseHandler {
             if (queryInfo) {
                 queriesArray[queryIndex] = { ...queryInfo, packet: updatedPacket };
 
-                const output = new Output(ID);
-                console.log(`Index ${queryIndex}: ${updatedPacket.Questions[0].Name}, ${updatedPacket.Questions[0].Type}: `);
-                const result = output.findingIPAddress();
-                if (result.length !== 0) {
-                    console.log(result);
-                } 
-                else {
-                    console.log("No IP Adresses found");
-                }
-
-                const pendingQuery = pendingQueries.get(ID);
-                if (pendingQuery) {
-                    pendingQuery.resolve();
-                    pendingQueries.delete(ID);
-                }
+                const output: IOutput = new Output(ID);
+                const results = output.findingIPAddress();
+                output.outputAnswer(results, updatedPacket, queryIndex, ID);
+                
             } else {
                 console.error(`Query info for ID ${ID} is undefined.`);
             }
