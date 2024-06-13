@@ -8,17 +8,33 @@ export class DnsClient {
         await this.processData(data);
     }
 
-    private queryFlow(index: number, headerID: number, name: string, type: string) {
+    private queryFlow(name: string, type: string) {
+        let realName = name;
+        if (type === "A" || type === "AAAA") {
+            realName = name.replace(/^www\./, ''); 
+        }
+
+        const randomNumber = Math.floor(Math.random() * 65536); 
+        const index = queriesArray.length;
+        queriesArray.push({ index, headerID: randomNumber, domainName: realName, type, packet: null });
+
+        let resolvePromise: () => void;
+        const promise = new Promise<void>((resolve) => {
+            resolvePromise = resolve;
+        });
+
+        pendingQueries.set(randomNumber, { promise, resolve: resolvePromise! });
+
         if (type === "A") {
-            const packet = DNSPacket.makeAQuery(headerID, name);
+            const packet = DNSPacket.makeAQuery(randomNumber, name);
             sockets.performDnsQuery(packet.toBuffer());
         } 
         else if (type === "AAAA") {
-            const packet = DNSPacket.makeAAAAQuery(headerID, name);
+            const packet = DNSPacket.makeAAAAQuery(randomNumber, name);
             sockets.performDnsQuery(packet.toBuffer());
         }
         else if (type === "CNAME") {
-            const packet = DNSPacket.makeCNAMEQuery(headerID, name);
+            const packet = DNSPacket.makeCNAMEQuery(randomNumber, name);
             sockets.performDnsQuery(packet.toBuffer());
         }
     }
@@ -36,23 +52,7 @@ export class DnsClient {
                     return;
                 }
 
-                let realName = name;
-                if (type === "A" || type === "AAAA") {
-                    realName = name.replace(/^www\./, ''); 
-                }
-
-                const randomNumber = Math.floor(Math.random() * 65536); 
-                const index = queriesArray.length;
-                queriesArray.push({ index, headerID: randomNumber, domainName: realName, type, packet: null });
-
-                let resolvePromise: () => void;
-                const promise = new Promise<void>((resolve) => {
-                    resolvePromise = resolve;
-                });
-
-                pendingQueries.set(randomNumber, { promise, resolve: resolvePromise! });
-
-                this.queryFlow(index, randomNumber, realName, type);
+                await this.queryFlow(name, type);
             }
         } catch (error) {
             console.error("Error processing data:", error);

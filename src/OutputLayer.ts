@@ -1,4 +1,3 @@
-import { DNSPacket } from "./PacketInfo";
 import { queriesArray } from "./StartingPoint";
 
 export class Output {
