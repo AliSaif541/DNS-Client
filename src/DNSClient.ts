@@ -49,7 +49,7 @@ export class DnsClient implements DNSInterface {
                 } else if (type === "CNAME") {
                     packet = DNSPacket.makeCNAMEQuery(randomNumber, name);
                 } else {
-                    continue; // This line is technically unreachable due to earlier validation
+                    continue;
                 }
                 sockets.performDnsQuery(packet.toBuffer());
             }
