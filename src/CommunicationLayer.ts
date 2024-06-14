@@ -5,32 +5,32 @@ import { TcpCommunicator } from './TCPCommunicator';
 type ResponseHandler = (responseBuffer: Buffer) => void;
 
 export class Communicator {
-    private udpCommunicator: ICommunicator;
-    private tcpCommunicator: ICommunicator;
+    private primaryCommunicator: ICommunicator;
+    private secondaryCommunicator: ICommunicator;
     private responseHandler: ResponseHandler;
 
-    constructor(responseHandler: ResponseHandler, udpCommunicator?: ICommunicator, tcpCommunicator?: ICommunicator) {
+    constructor(responseHandler: ResponseHandler, primaryCommunicator?: ICommunicator, secondaryCommunicator?: ICommunicator) {
         this.responseHandler = responseHandler;
-        this.udpCommunicator = udpCommunicator || new UdpCommunicator();
-        this.tcpCommunicator = tcpCommunicator || new TcpCommunicator();
+        this.primaryCommunicator = primaryCommunicator || new UdpCommunicator();
+        this.secondaryCommunicator = secondaryCommunicator || new TcpCommunicator();
 
-        this.udpCommunicator.onResponse(
+        this.primaryCommunicator.onResponse(
             (msg) => this.responseHandler(msg),
-            (err) => console.error('UDP Communicator error:', err)
+            (err) => console.error('Primary Communicator error:', err)
         );
 
-        this.tcpCommunicator.onResponse(
+        this.secondaryCommunicator.onResponse(
             (data) => this.responseHandler(data.subarray(2)),
-            (err) => console.error('TCP Communicator error:', err)
+            (err) => console.error('Secondary Communicator error:', err)
         );
     }
 
     async performDnsQuery(queryBuffer: Buffer): Promise<void> {
         try {
             if (queryBuffer.length <= 512) {
-                this.udpCommunicator.send(queryBuffer);
+                this.primaryCommunicator.send(queryBuffer);
             } else {
-                this.tcpCommunicator.send(queryBuffer);
+                this.secondaryCommunicator.send(queryBuffer);
             }
         } catch (error) {
             console.error('Error during DNS query:', error);
@@ -39,7 +39,7 @@ export class Communicator {
     }
 
     closeSockets(): void {
-        this.udpCommunicator.close();
-        this.tcpCommunicator.close();
+        this.primaryCommunicator.close();
+        this.secondaryCommunicator.close();
     }
 }
