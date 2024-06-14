@@ -1,12 +1,15 @@
 import { DNSInterface } from "./DNSClientInterface";
 import { DNSPacket } from "./PacketInfo";
-import { sockets, queriesArray, pendingQueries } from "./StartingPoint";
+import { sockets, pendingQueries } from "./StartingPoint";
 
 export type UserInterfaceData = { name: string, type: string };
 
 export class DnsClient implements DNSInterface {
+    queriesArray !: Array<{ index: number, headerID: number, domainName: string, type: string, packet: DNSPacket | null }>;
+
     async start() {
         // User can initialize their own objects in start through interface
+        this.queriesArray = [];
     }
 
     async queryFlow(data: UserInterfaceData[]) {
@@ -28,8 +31,8 @@ export class DnsClient implements DNSInterface {
                 }
         
                 const randomNumber = Math.floor(Math.random() * 65536); 
-                const index = queriesArray.length;
-                queriesArray.push({ index, headerID: randomNumber, domainName: realName, type, packet: null });
+                const index = this.queriesArray.length;
+                this.queriesArray.push({ index, headerID: randomNumber, domainName: realName, type, packet: null });
         
                 let resolvePromise: () => void;
                 const promise = new Promise<void>((resolve) => {
@@ -38,18 +41,17 @@ export class DnsClient implements DNSInterface {
         
                 pendingQueries.set(randomNumber, { promise, resolve: resolvePromise! });
         
+                let packet: DNSPacket;
                 if (type === "A") {
-                    const packet = DNSPacket.makeAQuery(randomNumber, name);
-                    sockets.performDnsQuery(packet.toBuffer());
-                } 
-                else if (type === "AAAA") {
-                    const packet = DNSPacket.makeAAAAQuery(randomNumber, name);
-                    sockets.performDnsQuery(packet.toBuffer());
+                    packet = DNSPacket.makeAQuery(randomNumber, name);
+                } else if (type === "AAAA") {
+                    packet = DNSPacket.makeAAAAQuery(randomNumber, name);
+                } else if (type === "CNAME") {
+                    packet = DNSPacket.makeCNAMEQuery(randomNumber, name);
+                } else {
+                    continue; // This line is technically unreachable due to earlier validation
                 }
-                else if (type === "CNAME") {
-                    const packet = DNSPacket.makeCNAMEQuery(randomNumber, name);
-                    sockets.performDnsQuery(packet.toBuffer());
-                }
+                sockets.performDnsQuery(packet.toBuffer());
             }
         } catch (error) {
             console.error("Error processing data:", error);

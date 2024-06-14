@@ -1,5 +1,6 @@
 import * as fs from 'fs';
 import * as readline from 'readline';
+import { DNSInputInterface } from './DNSInputInterface';
 import { Client } from './StartingPoint';
 
 interface DNSRecord {
@@ -7,25 +8,24 @@ interface DNSRecord {
   type: string;
 }
 
-async function readDNSRecords(filePath: string): Promise<DNSRecord[]> {
-  const fileStream = fs.createReadStream(filePath);
+export class FileInput implements DNSInputInterface {
+    private filePath: string;
 
-  const rl = readline.createInterface({
-    input: fileStream,
-    crlfDelay: Infinity
-  });
+    constructor(filePath: string) {
+        this.filePath = filePath;
+    }
 
-  const records: DNSRecord[] = [];
+    async startInput(): Promise<void> {
+        const fileStream = fs.createReadStream(this.filePath);
 
-  for await (const line of rl) {
-    const [domainName, recordType] = line.split(',').map(part => part.trim());
-  
-    await Client.queryFlow([{ name: domainName, type: recordType }]);
-  }
+        const rl = readline.createInterface({
+            input: fileStream,
+            crlfDelay: Infinity
+        });
 
-  return records;
-}
-
-export default async function startFileInterface(): Promise<void> {
-    await readDNSRecords("data.txt");
+        for await (const line of rl) {
+            const [domainName, recordType] = line.split(',').map(part => part.trim());
+            await Client.queryFlow([{ name: domainName, type: recordType }]);
+        }
+    }
 }

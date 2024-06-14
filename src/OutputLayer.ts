@@ -1,6 +1,7 @@
 import { IOutput } from './OutputInterface';
 import { DNSPacket } from "./PacketInfo";
-import { pendingQueries, queriesArray } from "./StartingPoint";
+import { Client, pendingQueries } from "./StartingPoint";
+
 
 export class Output implements IOutput {
     ID: number;
@@ -10,7 +11,7 @@ export class Output implements IOutput {
     }
 
     private findingIPAddress(): string[] {
-        const storedValue = queriesArray.find(query => query.headerID === this.ID);
+        const storedValue = Client.queriesArray.find(query => query.headerID === this.ID);
         const packet = storedValue?.packet;
 
         if (packet) {
@@ -22,7 +23,7 @@ export class Output implements IOutput {
     }
 
     private outputAnswer(results: string[], queryIndex: number): void {
-        const storedValue = queriesArray.find(query => query.headerID === this.ID);
+        const storedValue = Client.queriesArray.find(query => query.headerID === this.ID);
         const updatedPacket = storedValue?.packet;
         if (updatedPacket) {
             console.log(`Index ${queryIndex}: ${updatedPacket.Questions[0].Name}, ${updatedPacket.Questions[0].Type}: `);

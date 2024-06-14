@@ -1,4 +1,4 @@
-import { queriesArray } from "./StartingPoint";
+import { Client } from "./StartingPoint";
 
 class DNSHeader {
     ID: number;
@@ -229,7 +229,7 @@ export class DNSPacket {
     static parse(response: Buffer): DNSPacket {
         const header = DNSHeader.decodeHeader(response);
     
-        const entry = queriesArray.find(query => query.headerID === header.ID);
+        const entry = Client.queriesArray.find(query => query.headerID === header.ID);
         if (!entry) {
             throw new Error("Response Incorrect. Packet could not be identified.");
         }

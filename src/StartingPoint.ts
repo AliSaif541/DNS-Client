@@ -1,24 +1,24 @@
 import { Communicator } from "./CommunicationLayer";
 import { DnsClient } from "./DNSClient";
 import { DNSInterface } from "./DNSClientInterface";
-import startFileInterface from "./FileInput";
-import { DNSPacket } from "./PacketInfo";
+import { DNSInputInterface } from "./DNSInputInterface";
+import { FileInput } from "./FileInput";
 import { ResponseHandler } from './ResponseLayer';
-import startUserInterface from "./UserInterface";
+import { CLIInput } from "./UserInterface";
 
-export const queriesArray: Array<{ index: number, headerID: number, domainName: string, type: string, packet: DNSPacket | null }> = [];
 export const pendingQueries = new Map<number, { promise: Promise<void>, resolve: () => void }>();
 export const sockets = new Communicator(ResponseHandler.handleResponse);
 export const Client: DNSInterface = new DnsClient();
 
-const mainFunction = async () => {
+const mainFunction = async (inputHandler: DNSInputInterface) => {
     try {
         await Client.start();
-        await startFileInterface();
+        await inputHandler.startInput();
         await Promise.all(Array.from(pendingQueries.values()).map(entry => entry.promise));
     } finally {
         sockets.closeSockets();
     }
 };
 
-mainFunction();
+const inputHandler: DNSInputInterface = new FileInput('data.txt');
+mainFunction(inputHandler);
