@@ -1,4 +1,3 @@
 export interface IOutput {
-    ID: number;
-    handleResponse(queryIndex: number): void;
+    handleResponse(queryIndex: number, ID: number): void;
 }
