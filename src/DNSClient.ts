@@ -1,6 +1,6 @@
+import { Communicator } from "./CommunicationLayer";
 import { DNSInterface } from "./DNSClientInterface";
 import { DNSPacket } from "./DNSPacket";
-import { sockets, pendingQueries } from "./StartingPoint";
 
 export type UserInterfaceData = { name: string, type: string };
 
@@ -14,10 +14,17 @@ interface arrayData {
 
 export class DnsClient implements DNSInterface {
     queriesArray !: Array<arrayData>;
+    sockets !: Communicator;
+    pendingQueries !: Map<number, { promise: Promise<void>, resolve: () => void }>;
 
-    async start() {
-        // User can initialize their own objects in start through interface
+    async start(sockets: Communicator) {
         this.queriesArray = [];
+        this.sockets = sockets;
+        this.pendingQueries = new Map<number, { promise: Promise<void>, resolve: () => void }>();
+    }
+
+    async waitForPendingQueries() {
+        await Promise.all(Array.from(this.pendingQueries.values()).map(entry => entry.promise));
     }
 
     async queryFlow(data: UserInterfaceData[]) {
@@ -37,18 +44,18 @@ export class DnsClient implements DNSInterface {
                 if (type === "A" || type === "AAAA") {
                     realName = name.replace(/^www\./, ''); 
                 }
-        
+
                 const randomNumber = Math.floor(Math.random() * 65536); 
                 const index = this.queriesArray.length;
                 this.queriesArray.push({ index, headerID: randomNumber, domainName: realName, type, packet: null });
-        
+
                 let resolvePromise: () => void;
                 const promise = new Promise<void>((resolve) => {
                     resolvePromise = resolve;
                 });
-        
-                pendingQueries.set(randomNumber, { promise, resolve: resolvePromise! });
-        
+
+                this.pendingQueries.set(randomNumber, { promise, resolve: resolvePromise! });
+
                 let packet: DNSPacket;
                 switch (type) {
                     case "A":
@@ -63,7 +70,7 @@ export class DnsClient implements DNSInterface {
                     default:
                         continue;
                 }
-                sockets.performDnsQuery(packet.toBuffer());
+                this.sockets.performDnsQuery(packet.toBuffer());
             }
         } catch (error) {
             console.error("Error processing data:", error);

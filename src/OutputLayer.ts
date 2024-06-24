@@ -1,7 +1,6 @@
 import { IOutput } from './OutputInterface';
 import { DNSPacket } from "./DNSPacket";
-import { Client, pendingQueries } from "./StartingPoint";
-
+import { Client } from "./StartingPoint";
 
 export class Output implements IOutput {
     private findingIPAddress(ID: number): string[] {
@@ -28,10 +27,10 @@ export class Output implements IOutput {
                 console.log("No IP Adresses found");
             }
     
-            const pendingQuery = pendingQueries.get(ID);
+            const pendingQuery = Client.pendingQueries.get(ID);
             if (pendingQuery) {
                 pendingQuery.resolve();
-                pendingQueries.delete(ID);
+                Client.pendingQueries.delete(ID);
             }
         }
     }
