@@ -3,11 +3,6 @@ import * as readline from 'readline';
 import { DNSInputInterface } from './DNSInputInterface';
 import { Client } from './StartingPoint';
 
-interface DNSRecord {
-  name: string;
-  type: string;
-}
-
 export class FileInput implements DNSInputInterface {
     private filePath: string;
 

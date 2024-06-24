@@ -1,11 +1,19 @@
 import { DNSInterface } from "./DNSClientInterface";
-import { DNSPacket } from "./PacketInfo";
+import { DNSPacket } from "./DNSPacket";
 import { sockets, pendingQueries } from "./StartingPoint";
 
 export type UserInterfaceData = { name: string, type: string };
 
+interface arrayData {
+    index: number;
+    headerID: number;
+    domainName: string;
+    type: string;
+    packet: DNSPacket | null
+}
+
 export class DnsClient implements DNSInterface {
-    queriesArray !: Array<{ index: number, headerID: number, domainName: string, type: string, packet: DNSPacket | null }>;
+    queriesArray !: Array<arrayData>;
 
     async start() {
         // User can initialize their own objects in start through interface
@@ -42,14 +50,18 @@ export class DnsClient implements DNSInterface {
                 pendingQueries.set(randomNumber, { promise, resolve: resolvePromise! });
         
                 let packet: DNSPacket;
-                if (type === "A") {
-                    packet = DNSPacket.makeAQuery(randomNumber, name);
-                } else if (type === "AAAA") {
-                    packet = DNSPacket.makeAAAAQuery(randomNumber, name);
-                } else if (type === "CNAME") {
-                    packet = DNSPacket.makeCNAMEQuery(randomNumber, name);
-                } else {
-                    continue;
+                switch (type) {
+                    case "A":
+                        packet = DNSPacket.makeAQuery(randomNumber, name);
+                        break;
+                    case "AAAA":
+                        packet = DNSPacket.makeAAAAQuery(randomNumber, name);
+                        break;
+                    case "CNAME":
+                        packet = DNSPacket.makeCNAMEQuery(randomNumber, name);
+                        break;
+                    default:
+                        continue;
                 }
                 sockets.performDnsQuery(packet.toBuffer());
             }

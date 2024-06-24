@@ -1,7 +1,5 @@
-import { pendingQueries, Client, output } from './StartingPoint';
-import { DNSPacket } from './PacketInfo';
-import { IOutput } from './OutputInterface';
-import { Output } from './OutputLayer';
+import { Client, output } from './StartingPoint';
+import { DNSPacket } from './DNSPacket';
 
 export class ResponseHandler {
     static handleResponse(responseBuffer: Buffer) {
@@ -14,8 +12,6 @@ export class ResponseHandler {
             const queryInfo = Client.queriesArray[queryIndex];
             if (queryInfo) {
                 Client.queriesArray[queryIndex] = { ...queryInfo, packet: updatedPacket };
-
-                // const output: IOutput = new Output;
                 output.handleResponse(queryIndex, ID);
             } else {
                 console.error(`Query info for ID ${ID} is undefined.`);

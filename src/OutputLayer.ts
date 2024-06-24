@@ -1,15 +1,9 @@
 import { IOutput } from './OutputInterface';
-import { DNSPacket } from "./PacketInfo";
+import { DNSPacket } from "./DNSPacket";
 import { Client, pendingQueries } from "./StartingPoint";
 
 
 export class Output implements IOutput {
-    // ID: number;
-
-    // constructor(ID: number) {
-    //     this.ID = ID;
-    // }
-
     private findingIPAddress(ID: number): string[] {
         const storedValue = Client.queriesArray.find(query => query.headerID === ID);
         const packet = storedValue?.packet;
